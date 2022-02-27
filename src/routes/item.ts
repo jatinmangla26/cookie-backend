@@ -1,6 +1,6 @@
 import * as express from "express";
 import { fetchUser } from "../middleware/fetchUser";
-import { addItem,getItem, infoItem, updateItem } from "../controllers/itemController";
+import { addItem,deleteItem,getItem, infoItem, updateItem } from "../controllers/itemController";
 
 
 const app = express();
@@ -11,5 +11,5 @@ router.post('/additem',fetchUser,addItem);
 router.get('/getItem',fetchUser,getItem);
 router.get('/infoItem/:itemId',infoItem);
 router.put('/updateItem/:itemId',fetchUser,updateItem);
-router.put('/deleteItem/:itemId',fetchUser,updateItem);
+router.delete('/deleteItem/:itemId',fetchUser,deleteItem);
 module.exports = router;

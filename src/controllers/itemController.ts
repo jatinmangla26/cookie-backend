@@ -81,3 +81,34 @@ export const infoItem = async (req: any, res: any) => {
     });
   // console.log(Item);
 };
+
+export const deleteItem = async (req: any, res: any) => {
+    const itemId=req.params.itemId;
+    const id=req.id;
+    console.log(id);
+    item.findOne({_id:itemId}).then((Item)=>{
+        if(Item)
+        {
+            console.log(Item.OwnerId.toString());
+            if(Item.OwnerId.toString()===id)
+            {
+                item.deleteOne({_id:itemId}).then(()=>{
+                    
+                    res.json("Item Deleted");
+                }).catch((error)=>{
+                    res.json(error);
+                });
+            }
+            else
+            res.json("Invalid User");
+        }
+        else
+        {
+            res.json("No Item Exist");
+        }
+        
+
+    }).catch((error)=>{
+        res.json(error);
+    })
+};
