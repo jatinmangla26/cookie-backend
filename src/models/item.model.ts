@@ -4,16 +4,16 @@ import { Item } from "src/types";
 const { Schema } = mongoose;
 
 const itemSchema = new Schema<Item>({
-  name: String,
-  Price:Number,
-  Description:String,
-  OwnerId:
-  {
-      type:Schema.Types.ObjectId,
-      ref:'User'
-  },
-  Quantity:Number
+    name: String,
+    Price: Number,
+    Description: String,
+    OwnerId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    },
+    Quantity: Number,
+    Category: String,
+    imageUrl: String,
 });
 
-export const item=model('Item',itemSchema);
-
+export const item = model("Item", itemSchema);
