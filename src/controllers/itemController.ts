@@ -9,7 +9,6 @@ dotenv.config();
 
 export const addItem = async (req: any, res: any) => {
     const { name, Quantity, Price, Description, Category } = req.body;
-    // console.log(req.id);
     const User = await user.findOne({ _id: req.id });
     let image;
     if (!User)
