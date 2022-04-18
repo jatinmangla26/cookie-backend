@@ -19,11 +19,11 @@ export const addItem = async (req: any, res: any) => {
         return res
             .status(400)
             .send({ error: "Enter All Details", type: "Details" });
-    // try {
-    //     image = uploadImageToStorage(req.file);
-    // } catch (e) {
-    //     return res.status(400).send({ error: e.message, type: "Image" });
-    // }
+    try {
+        image = uploadImageToStorage(req.file);
+    } catch (e) {
+        return res.status(400).send({ error: e.message, type: "Image" });
+    }
     item.create({
         name,
         Price,
@@ -87,13 +87,12 @@ export const updateItem = async (req: any, res: any) => {
 
 export const infoItem = async (req: any, res: any) => {
     console.log(req.params.itemId);
-    item.find({ _id: req.params.itemId })
+    item.findOne({ _id: req.params.itemId })
         .then((Item) => {
-            if (Item.length === 0) res.json({ err: "No Items Your Match" });
-            else res.json(Item);
+            res.status(201).send({ data: Item, type: "Item" });
         })
         .catch((error) => {
-            res.json(error);
+            res.status(401).send({ data: "No Item Exist", type: "NULL" });
         });
     // console.log(Item);
 };

@@ -34,6 +34,8 @@ const main = () => {
 
     app.use("/cart",require("./routes/cart"));
 
+    app.use("/order",require("./routes/order"));
+
     app.listen(port, () => {
         console.log(`Cookie listening on port ${port}`);
     });
