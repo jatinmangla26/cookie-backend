@@ -7,6 +7,7 @@ import helmet from "helmet";
 dotenv.config();
 
 const connectUri = process.env.MONGO_URI;
+// const connectUri=process.env.MONGO_URI_ATLAS;
 const connectToMongo = () => {
     mongoose
         .connect(connectUri!)
@@ -32,9 +33,9 @@ const main = () => {
 
     app.use("/items", require("./routes/item"));
 
-    app.use("/cart",require("./routes/cart"));
+    app.use("/cart", require("./routes/cart"));
 
-    app.use("/order",require("./routes/order"));
+    app.use("/order", require("./routes/order"));
 
     app.listen(port, () => {
         console.log(`Cookie listening on port ${port}`);

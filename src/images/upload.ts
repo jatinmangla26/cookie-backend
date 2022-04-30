@@ -20,6 +20,7 @@ export const multer = Multer({
 });
 
 export const uploadImageToStorage = (file: Express.Multer.File) => {
+    // console.log(file);
     if (!file) {
         throw new Error("No image file");
     }

@@ -1,9 +1,22 @@
 export interface Item {
     name: String;
-    Price: number;
+    reviews:[review]
+    Cost: {
+        Price:Number;
+        negotiable:Boolean
+    };
+    expiresOn:Date;
+    shippingAddress:String;
+    
     Quantity: Number;
-    OwnerId: any;
+    user:any;
     Description: String;
     Category: String;
     imageUrl: string;
+}
+export interface review{
+    user:any;
+    name:String;
+    comment:String;
+
 }

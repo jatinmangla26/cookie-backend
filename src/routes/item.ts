@@ -1,34 +1,38 @@
 import * as express from "express";
-import { fetchUser } from "../middleware/fetchUser";
 import {
     addItem,
     deleteItem,
-    getAllItem,
-    getItem,
-    infoItem,
+    getItemById,
+    getProducts,
+    reviewProduct,
     updateItem,
-    searchItem
 } from "../controllers/itemController";
 import * as Multer from "multer";
 import { multer } from "../images/upload";
-
+import { admin, protect } from "../middleware/fetchUser";
+const upload = require("multer")();
 const app = express();
 var router = express.Router();
 
-router.post("/additem", fetchUser, multer.single("file"), addItem);
+// router.post("/additem", multer.single("file"), addItem);
+router.route("/allitems").get(getProducts);
+router.route("/additem").post(multer.single("file"), protect, addItem);
+router.route("/:id/reviews").post(protect, reviewProduct);
+router
+    .route("/:id")
+    .get(getItemById)
+    .delete(protect, admin, deleteItem)
+    .put(protect, updateItem);
+// router.get("/getItem", getItem);
 
-router.get("/getItem", fetchUser, getItem);
+// router.get("/infoItem/:itemId", infoItem);
 
-router.get("/infoItem/:itemId", infoItem);
+// router.put("/updateItem/:itemId", updateItem);
 
-router.put("/updateItem/:itemId", fetchUser, updateItem);
+// router.delete("/deleteItem/:itemId", deleteItem);
 
-router.delete("/deleteItem/:itemId", fetchUser, deleteItem);
+// router.get("/allItems", getAllItem);
 
-router.get("/allItems", getAllItem);
-
-router.get("/search/:name", searchItem);
-
-
+// router.get("/search/:name", searchItem);
 
 module.exports = router;

@@ -11,6 +11,10 @@ const orderSchema = new Schema<Order>({
         type: Schema.Types.ObjectId,
         ref: "User",
     },
+    ownerId:{
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    },
 
 
 });

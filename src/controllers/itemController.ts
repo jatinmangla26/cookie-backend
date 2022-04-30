@@ -8,81 +8,132 @@ import { uploadImageToStorage } from "../images/upload";
 dotenv.config();
 
 export const addItem = async (req: any, res: any) => {
-    const { name, Quantity, Price, Description, Category } = req.body;
-    const User = await user.findOne({ _id: req.id });
+    console.log(req.body);
+    const {
+        name,
+        description,
+        category,
+        expiresOn,
+        address,
+        shippingCharge,
+        price,
+        negotiable,
+    } = req.body;
+    // console.log(req.body);
+    const validatename = name.length;
+    const validatedescription = description.length;
+    const validateaddress = address.length;
+    const validatecategory = category.length;
+    if (validatename < 3) {
+        res.status(400).send("Name must be of 3 characters  or more length ");
+    }
+    if (validatedescription < 7) {
+        res.status(400).send(
+            "Description must be of 7 characters  or more length "
+        );
+    }
+    if (validateaddress < 5) {
+        res.status(400).send(
+            "Address must be of 5 characters  or more length "
+        );
+    }
+    if (validatecategory < 5) {
+        res.status(400).send(
+            "Category must be of 5 characters  or more length "
+        );
+    }
+    var x = new Date(expiresOn);
+    var y = new Date(Date.now());
+
     let image;
-    if (!User)
-        return res
-            .status(400)
-            .send({ error: "User Does not Exist", type: "User" });
-    if (!name && !Price && !Description && !Category)
-        return res
-            .status(400)
-            .send({ error: "Enter All Details", type: "Details" });
+
     try {
         image = uploadImageToStorage(req.file);
     } catch (e) {
         return res.status(400).send({ error: e.message, type: "Image" });
     }
-    item.create({
-        name,
-        Price,
-        Description,
-        Quantity,
-        Category,
-        OwnerId: req.id,
-        imageUrl: image,
-    })
-        .then((newItem) => {
-            return res.status(201).send(newItem);
+    const product = await item
+        .create({
+            name,
+            images: image,
+            description,
+            category,
+            expiresOn,
+            user: req.user._id,
+            shippingAddress: { address, shippingCharge },
+            seller: {
+                sellername: req.user.name,
+                selleraddress: req.user.address,
+                selleremail: req.user.email,
+                phoneNo: {
+                    mobile: req.user.contact.phoneNumber,
+                    isVerified: req.user.contact.isVerified,
+                },
+            },
+            Cost: { price, negotiable },
         })
-        .catch((error) => {
-            return res.status(401).send(error);
+        .then(() => {
+            return res.status(201).send("Your property is successfully listed");
+        })
+        .catch((err) => {
+            return res.status(400).send(err);
         });
 };
 
-export const getItem = async (req: any, res: any) => {
-    const id = req.id;
-    const items = await item.find({ OwnerId: id });
-    if (items) return res.status(200).send({ items });
-    else return res.status(401).send({ items, type: "NULL" });
+export const getItemById = async (req: any, res: any) => {
+    const product = await item.findById(req.params.id);
+    if (product) {
+        return res.status(201).json(product);
+    } else {
+        return res.status(400).json({ message: "No product found" });
+    }
 };
 
 export const updateItem = async (req: any, res: any) => {
-    const id = req.id;
-    console.log(id);
-    const itemId = req.params.itemId;
-    const { name, Quantity, Price, Description, Category } = req.body;
-    const newItem = new item({
-        _id: itemId,
+    const {
         name,
-        Price,
-        Description,
-        Quantity,
-        OwnerId: req.id,
-        Category,
-    });
-    item.find({ _id: itemId, OwnerId: id })
-        .then(() => {
-            res.json("Item Finded");
-        })
-        .catch((error) => {
-            res.json(error);
-        });
-    // console.log(Item);
-    // item.updateOne({_id: itemId,OwnerId:id}, newItem).then(
-    //     () => {
-    //       res.status(201).json({
-    //         message: 'Thing updated successfully!'
-    //       });
-    //     }
-    //   ).catch(
-    //     (error) => {
-    //       res.status(400).json({
-    //         error: error
-    //       });
-    //     }
-    //   );
+        images,
+        description,
+        category,
+        expiresOn,
+        address,
+        shippingCharge,
+        price,
+        negotiable,
+    } = req.body;
+
+    const product = await item.findById(req.params.id);
+
+    var x = new Date(expiresOn);
+    var y = new Date(Date.now());
+
+    if (x < y) {
+        res.status(400);
+        throw new Error("Put the upcoming date");
+    }
+    if (
+        (product && product.user.toString() === req.user._id.toString()) ||
+        (product && req.user.isAdmin)
+    ) {
+        product.name = name || product.name;
+        product.images = images || product.images;
+        product.description = description || product.description;
+        product.category = category || product.category;
+        product.expiresOn = expiresOn || product.expiresOn;
+        product.shippingAddress.address =
+            address || product.shippingAddress.address;
+        product.shippingAddress.shippingCharge =
+            shippingCharge || product.shippingAddress.shippingCharge;
+
+        product.Cost.price = price || product.Cost.price;
+        product.Cost.negotiable = negotiable || product.Cost.negotiable;
+
+        const updatedProduct = await product.save();
+        res.status(201).json(updatedProduct);
+    } else {
+        res.status(404);
+        throw new Error("You cannot edit this product");
+    }
 };
 
 export const infoItem = async (req: any, res: any) => {
@@ -98,31 +149,30 @@ export const infoItem = async (req: any, res: any) => {
 };
 
 export const deleteItem = async (req: any, res: any) => {
-    const itemId = req.params.itemId;
-    const id = req.id;
-    console.log(id);
-    item.findOne({ _id: itemId })
-        .then((Item) => {
-            if (Item) {
-                console.log(Item.OwnerId.toString());
-                if (Item.OwnerId.toString() === id) {
-                    item.deleteOne({ _id: itemId })
-                        .then(() => {
-                            res.json("Item Deleted");
-                        })
-                        .catch((error) => {
-                            res.json(error);
-                        });
-                } else res.json("Invalid User");
-            } else {
-                res.json("No Item Exist");
-            }
-        })
-        .catch((error) => {
-            res.json(error);
-        });
+    const product = await item.findById(req.params.id);
+    if (product) {
+        await product.remove();
+        return res.status(201).send({ message: "Product removed" });
+    } else {
+        return res.status(404).send("Product not found");
+    }
 };
 
+export const reviewProduct = async (req: any, res: any) => {
+    const { comment } = req.body;
+    console.log(req.body);
+    const review = {
+        name: req.user.name,
+        comment,
+        user: req.user._id,
+    };
+    const product = await item.findById(req.params.id);
+
+    product.reviews.push(review);
+
+    await product.save();
+    res.status(201).json({ message: "Review successfully added" });
+};
 export const getAllItem = async (req: any, res: any) => {
     const items = await item.find({});
     return res.status(200).send({ items });
@@ -133,4 +183,35 @@ export const searchItem = async (req: any, res: any) => {
     user.find({ name: regex }).then((result) => {
         return res.status(200).send(result);
     });
+};
+
+export const getProducts = async (req: any, res: any) => {
+    const pageSize = 6;
+    const page = Number(req.query.pageNumber) || 1;
+    const keyword = req.query.keyword
+        ? {
+              name: {
+                  $regex: req.query.keyword,
+                  $options: "i",
+              },
+          }
+        : {};
+
+    const count = await item.countDocuments({ ...keyword });
+    const products = await item
+        .find({ ...keyword }, null, {
+            sort: { createdAt: -1 },
+        })
+        .limit(pageSize)
+        .skip(pageSize * (page - 1));
+    console.log(products);
+    if (products.length !== 0) {
+        res.status(201).json({
+            products,
+            page,
+            pages: Math.ceil(count / pageSize),
+        });
+    } else {
+        res.status(400).json({ message: "No match found" });
+    }
 };
