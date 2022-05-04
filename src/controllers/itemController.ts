@@ -92,7 +92,6 @@ export const getItemById = async (req: any, res: any) => {
 export const updateItem = async (req: any, res: any) => {
     const {
         name,
-        images,
         description,
         category,
         expiresOn,
@@ -101,7 +100,7 @@ export const updateItem = async (req: any, res: any) => {
         price,
         negotiable,
     } = req.body;
-
+    console.log(req.body);
     const product = await item.findById(req.params.id);
 
     var x = new Date(expiresOn);
@@ -116,8 +115,8 @@ export const updateItem = async (req: any, res: any) => {
         (product && req.user.isAdmin)
     ) {
         product.name = name || product.name;
-        product.images = images || product.images;
-        product.description = description || product.description;
+        // product.images = images || product.images;
+        product.description = "Expensive" || product.description;
         product.category = category || product.category;
         product.expiresOn = expiresOn || product.expiresOn;
         product.shippingAddress.address =
@@ -129,10 +128,9 @@ export const updateItem = async (req: any, res: any) => {
         product.Cost.negotiable = negotiable || product.Cost.negotiable;
 
         const updatedProduct = await product.save();
-        res.status(201).json(updatedProduct);
+        return res.status(201).json(updatedProduct);
     } else {
-        res.status(404);
-        throw new Error("You cannot edit this product");
+        return res.status(404).send("You cannot edit this product");
     }
 };
 

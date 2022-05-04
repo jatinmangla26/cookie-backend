@@ -124,7 +124,7 @@ export const loginUser = async (req: any, res: any) => {
         const User = await user.findOne({ email });
         if (!User)
             return res
-                .status(401)
+                .status(400)
                 .send({ errors: "User DOES NOT Exists", type: "EXISTS" });
         else {
             console.log(User.password);
@@ -193,7 +193,7 @@ export const updateUserProfile = async (req: any, res: any) => {
                 (User.contact.phoneNumber =
                     phone_no || User.contact.phoneNumber);
             const updatedUser = await User.save();
-            res.status(201).json({
+            return res.status(201).json({
                 _id: updatedUser._id,
                 name: updatedUser.name,
                 email: updatedUser.email,
@@ -202,10 +202,10 @@ export const updateUserProfile = async (req: any, res: any) => {
                 contact: updatedUser.contact,
             });
         } else {
-            res.status(401).send("You cannot perform this action");
+            return res.status(401).send("You cannot perform this action");
         }
     } else {
-        res.status(404).send("No user found");
+        return res.status(404).send("No user found");
     }
 };
 export const getUserById = async (req: any, res: any) => {
